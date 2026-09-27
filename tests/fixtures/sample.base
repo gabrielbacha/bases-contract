@@ -1,0 +1,35 @@
+# A small Base with every block both apps write, for the tests.
+basesVisuals:
+  schemaVersion: 7
+  propertyStrategies:
+    note.status:
+      mode: distinct
+filters:
+  and:
+    - file.inFolder("Projects")
+properties:
+  note.status:
+    displayName: Status
+  note.direction:
+    displayName: Direction
+views:
+  - type: table
+    name: All projects
+    order:
+      - file.name
+      - note.status
+      - note.direction
+    rowHeight: medium
+    basesEditorView:
+      schemaVersion: 2
+      frozenColumnCount: 1
+basesEditor:
+  schemaVersion: 1
+  propertyTypes:
+    note.direction:
+      type: select
+      options:
+        - value: North
+          label: North
+        - value: South
+          color: "#8E44AD"

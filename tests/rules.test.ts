@@ -1,0 +1,125 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  defaultRuleBackgroundOpacity,
+  evaluateRule,
+  matchingRule,
+  normalizeRule,
+  normalizeRuleColor,
+  ruleColorVariables,
+} from "../src/rules";
+import type { ConditionalRule } from "../src/types";
+
+describe("conditional formatting rules", () => {
+  it("matches text case-insensitively while preserving exact operator behavior", () => {
+    const cell = { text: "  In Progress  ", values: ["In Progress"] };
+    expect(evaluateRule({ operator: "equals", operand: "in progress" }, cell)).toBe(true);
+    expect(evaluateRule({ operator: "contains", operand: "PROG" }, cell)).toBe(true);
+    expect(evaluateRule({ operator: "not-equals", operand: "done" }, cell)).toBe(true);
+  });
+
+  it("matches individual list values and empty cells", () => {
+    const list = { text: "Alpha, Beta", values: ["Alpha", "Beta"] };
+    expect(evaluateRule({ operator: "equals", operand: "beta" }, list)).toBe(true);
+    expect(evaluateRule({ operator: "not-contains", operand: "eta" }, list)).toBe(false);
+    expect(evaluateRule({ operator: "is-empty" }, { text: " ", values: [""] })).toBe(true);
+  });
+
+  it("rejects invalid numbers and evaluates all numeric operators", () => {
+    const cell = { text: "42.5", values: ["42.5"] };
+    expect(evaluateRule({ operator: "greater-than", operand: "40" }, cell)).toBe(true);
+    expect(evaluateRule({ operator: "less-or-equal", operand: "42.5" }, cell)).toBe(true);
+    expect(evaluateRule({ operator: "greater-than", operand: "4x" }, cell)).toBe(false);
+    expect(evaluateRule({ operator: "less-than", operand: "3" }, { text: "n/a", values: ["n/a"] })).toBe(false);
+  });
+
+  it("uses the first enabled matching rule for a target", () => {
+    const rules = [rule("first", "row"), rule("second", "row"), rule("cell", "cell")];
+    expect(matchingRule(rules, "note.status", { text: "Done", values: ["Done"] }, "row")?.id).toBe("first");
+    rules[0]!.enabled = false;
+    expect(matchingRule(rules, "note.status", { text: "Done", values: ["Done"] }, "row")?.id).toBe("second");
+  });
+
+  it("normalizes valid colors and ignores malformed colors", () => {
+    expect(normalizeRuleColor({ kind: "custom", hex: "abc" })).toEqual({ kind: "custom", hex: "#AABBCC" });
+    expect(normalizeRuleColor({ kind: "preset", name: "green" })).toEqual({ kind: "preset", name: "green-sea" });
+    expect(normalizeRuleColor({ kind: "preset", name: "teal" })).toBeNull();
+  });
+
+  it("uses automatic contrast by default and preserves an explicit font color exactly", () => {
+    const background = { kind: "preset", name: "sun-flower" } as const;
+    const automatic = ruleColorVariables(background);
+    const explicit = ruleColorVariables(background, { kind: "custom", hex: "#FFFFFF" });
+    expect(explicit.background).toBe(automatic.background);
+    expect(explicit.hover).toBe(automatic.hover);
+    expect(explicit.foregroundLight).toBe("#FFFFFF");
+    expect(explicit.foregroundDark).toBe("#FFFFFF");
+  });
+
+  it("starts the permanent Muted treatment subtle", () => {
+    const muted = { kind: "preset", name: "default" } as const;
+    const neutral = ruleColorVariables(muted, undefined, "default", defaultRuleBackgroundOpacity(muted));
+    expect(neutral.background).toBe("color-mix(in srgb, var(--text-muted) 3%, transparent)");
+    expect(neutral.hover).toBe("color-mix(in srgb, var(--text-muted) 9%, transparent)");
+    expect(neutral.foregroundLight).toBe("var(--text-muted)");
+    expect(neutral.foregroundDark).toBe("var(--text-muted)");
+  });
+
+  it("leaves a rule without treatments visually inactive", () => {
+    const empty = ruleColorVariables();
+    expect(empty.background).toBe("transparent");
+    expect(empty.hover).toBe("transparent");
+    expect(empty.foregroundLight).toBe("inherit");
+    expect(empty.foregroundDark).toBe("inherit");
+    const emptyRule: ConditionalRule = rule("empty", "cell");
+    delete emptyRule.color;
+    expect(matchingRule([emptyRule], "note.status", { text: "done", values: ["done"] }, "cell")).toBeUndefined();
+  });
+
+  it("honors exact background opacity and caps the stronger hover tint", () => {
+    const color = { kind: "preset", name: "peter-river" } as const;
+    const transparent = ruleColorVariables(color, undefined, "default", 0);
+    expect(transparent.background).toBe("transparent");
+    expect(transparent.hover).toContain("6%");
+    const solid = ruleColorVariables(color, { kind: "custom", hex: "#FFFFFF" }, "default", 100);
+    expect(solid.background).toContain("100%");
+    expect(solid.hover).toContain("100%");
+    expect(solid.foregroundLight).toBe("#FFFFFF");
+  });
+});
+
+function rule(id: string, target: "cell" | "row"): ConditionalRule {
+  return {
+    id,
+    name: id,
+    enabled: true,
+    propertyId: "note.status",
+    operator: "equals",
+    operand: "done",
+    target,
+    color: { kind: "preset", name: "green-sea" },
+  };
+}
+
+describe("the opacity contract", () => {
+  it("shows a saved background at full strength unless an opacity is saved", () => {
+    const color = { kind: "custom", hex: "#FDE2E1" } as const;
+    expect(ruleColorVariables(color).background).toBe("color-mix(in srgb, #FDE2E1 100%, transparent)");
+    expect(ruleColorVariables(color, undefined, "default", 40).background).toBe(
+      "color-mix(in srgb, #FDE2E1 40%, transparent)",
+    );
+  });
+
+  it("reads old blocks with the opacity they meant", () => {
+    const saved = { id: "a", name: "A", propertyId: "note.status", operator: "equals", operand: "x", target: "row" };
+    const accent = { ...saved, color: { kind: "custom", hex: "#3498db" } };
+    const pale = { ...saved, color: { kind: "custom", hex: "#fde2e1" } };
+    const muted = { ...saved, color: { kind: "preset", name: "default" } };
+    const legacy = { scope: "view", legacy: true } as const;
+    expect(normalizeRule(accent, 0, legacy)?.backgroundOpacity).toBe(12);
+    expect(normalizeRule(pale, 0, legacy)?.backgroundOpacity).toBe(100);
+    expect(normalizeRule(muted, 0, legacy)?.backgroundOpacity).toBe(3);
+    expect(normalizeRule({ ...accent, backgroundOpacity: 40 }, 0, legacy)?.backgroundOpacity).toBe(40);
+    expect(normalizeRule(accent, 0, { scope: "view" })?.backgroundOpacity).toBeUndefined();
+  });
+});
