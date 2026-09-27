@@ -1,0 +1,61 @@
+{
+  "name": "@gabrielbacha/bases-contract",
+  "version": "1.0.3",
+  "description": "The shared contract for Obsidian Bases (.base) files: YAML patching, formatting rules, pill colours and the extension blocks.",
+  "keywords": [
+    "obsidian",
+    "obsidian-bases",
+    "bases",
+    "yaml"
+  ],
+  "homepage": "https://github.com/gabrielbacha/bases-contract#readme",
+  "bugs": {
+    "url": "https://github.com/gabrielbacha/bases-contract/issues"
+  },
+  "license": "MIT",
+  "author": "Gabriel Bacha",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabrielbacha/bases-contract.git"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --clean --target es2021 && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tests",
+    "test": "vitest run",
+    "check": "pnpm run typecheck && pnpm test",
+    "prepublishOnly": "pnpm run check && pnpm run build"
+  },
+  "dependencies": {
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.6",
+    "tsup": "^8.5.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  },
+  "packageManager": "pnpm@12.5.1"
+}
