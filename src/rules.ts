@@ -157,12 +157,12 @@ export function defaultRuleBackgroundOpacity(color: RuleColor): number {
   return color.kind === "preset" && color.name === "default" ? 3 : 12;
 }
 
-/** BaseStudio's fills were saved without an opacity and shown at full strength before the contract. */
+/** These pale fills were saved without an opacity and shown at full strength before the contract. */
 const LEGACY_FULL_STRENGTH_FILLS = new Set(RULE_FILL_SWATCHES.map((swatch) => swatch.hex));
 
 /**
  * The opacity an old block (written before the opacity contract) meant when it had none: the
- * Bases Visuals default tint, except for BaseStudio's pale fills, which showed at full strength.
+ * Bases Visuals default tint, except for the pale rule fills, which showed at full strength.
  */
 function legacyRuleOpacity(color: RuleColor): number {
   if (color.kind === "custom" && LEGACY_FULL_STRENGTH_FILLS.has(color.hex)) return 100;

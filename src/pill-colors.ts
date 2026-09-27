@@ -5,7 +5,7 @@ import { effectivePropertyStrategy } from "./property-strategies";
 import type { PaletteTemplateId, PropertyColorStrategy, StoredOption } from "./types";
 
 /**
- * The pastel backgrounds BaseStudio saved as option colours before colours became accents, with
+ * The pastel backgrounds saved as option colours before colours became accents, with
  * the accent each one stands for. They are read as those accents; files are not rewritten.
  */
 export const LEGACY_PASTEL_ACCENTS: Readonly<Record<string, string>> = {

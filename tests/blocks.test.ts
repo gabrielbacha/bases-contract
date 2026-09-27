@@ -175,7 +175,7 @@ describe("pill colours", () => {
     expect(pillColor({ declared }, "note.direction", "South").dot).toBe("#8E44AD");
   });
 
-  it("reads BaseStudio's old pastel option colours as their accents", () => {
+  it("reads old pastel option colours as their accents", () => {
     const context = { declared: { "note.kind": [{ value: "A", color: "#e2f1ff" }] } };
     expect(pillColor(context, "note.kind", "A").dot).toBe("#3498DB");
   });

@@ -1,7 +1,7 @@
 {
   "name": "@gabrielbacha/bases-contract",
-  "version": "1.0.1",
-  "description": "The shared contract for Obsidian Bases files used by BaseStudio and the Bases Visuals plugin: YAML patching, formatting rules, pill colours and the extension blocks.",
+  "version": "1.0.2",
+  "description": "The shared contract for Obsidian Bases files, used by the Bases Visuals plugin and other Bases editors: YAML patching, formatting rules, pill colours and the extension blocks.",
   "keywords": [
     "obsidian",
     "obsidian-bases",

@@ -8,7 +8,7 @@ import {
 
 /** Root keys of a `.base` file that Obsidian itself defines. */
 export const NATIVE_ROOT_KEYS = ["filters", "formulas", "properties", "views", "summaries"] as const;
-/** Root keys that BaseStudio and Bases Visuals add. Obsidian keeps them as they are. */
+/** Root keys that editors of Bases add. Obsidian keeps them as they are. */
 export const EXTENSION_ROOT_KEYS = [BASE_VISUALS_KEY, EDITOR_KEY] as const;
 
 /** View keys that Obsidian itself defines. */

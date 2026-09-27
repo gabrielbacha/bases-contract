@@ -1,6 +1,6 @@
 # @gabrielbacha/bases-contract
 
-The shared contract for Obsidian Bases (`.base`) files, used by BaseStudio and the [Bases Visuals](https://github.com/gabrielbacha/obsidian-base-visuals) Obsidian plugin. Each rule about the shared data is defined here once, and both apps import it.
+The shared contract for Obsidian Bases (`.base`) files, used by the [Bases Visuals](https://github.com/gabrielbacha/obsidian-base-visuals) Obsidian plugin and other editors of Bases. Each rule about the shared data is defined here once, and every editor imports it.
 
 It contains:
 
@@ -19,7 +19,7 @@ The package has one dependency, `yaml`, and runs in Node, Electron, and the brow
 | Column types and declared options (value, label, order, colour) | `basesEditor.propertyTypes` |
 | Palette, strategies, colours for values that are not declared, Base-wide rules, column appearance | `basesVisuals` |
 | View rules and view column appearance | `views[i].basesVisualsView` |
-| BaseStudio view settings | `views[i].basesEditorView` |
+| Editor view settings (frozen columns, groups, summaries) | `views[i].basesEditorView` |
 
 Short-lived interface state (search text, open panels) is never saved in a `.base` file.
 
