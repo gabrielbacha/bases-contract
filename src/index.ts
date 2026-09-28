@@ -1,4 +1,5 @@
 export * from "./colors";
+export * from "./column-appearance";
 export * from "./editor-blocks";
 export * from "./known-keys";
 export * from "./names";
