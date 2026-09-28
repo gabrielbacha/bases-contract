@@ -61,6 +61,8 @@ export interface StudioOption {
   value: string;
   label?: string;
   color?: string;
+  /** Where the option stands in a workflow (`STATUS_CATEGORIES`); used for display, never for filters. */
+  category?: string;
   [key: string]: unknown;
 }
 
@@ -86,6 +88,11 @@ export interface StudioProperty {
   style?: Record<string, unknown>;
   /** The value a new record gets. */
   default?: unknown;
+  /**
+   * For a link property: the vault path of the Base whose records its links point to
+   * (`Projects/Projects.base`). The values stay ordinary wiki links; see `studioLinkTarget`.
+   */
+  linkTarget?: string;
   [key: string]: unknown;
 }
 
@@ -171,6 +178,43 @@ export function studioOptions(property: StudioProperty): StudioOption[] {
     if (!isRecord(option) || typeof option.value !== "string" || !option.value) return [];
     return [option as StudioOption];
   });
+}
+
+/**
+ * The Base a link property points to: its vault path, with `/` separators and no leading slash,
+ * ending in `.base`. Undefined when the property has no target or the path is not a safe vault path
+ * (absolute on Windows, or with `.` or `..` segments).
+ */
+export function studioLinkTarget(property: StudioProperty): string | undefined {
+  const raw = property.linkTarget;
+  if (typeof raw !== "string") return undefined;
+  const path = raw.trim().replaceAll("\\", "/").replace(/^\/+/, "");
+  if (!/\.base$/i.test(path) || /^[a-z]:/i.test(path)) return undefined;
+  const segments = path.split("/");
+  return segments.every((segment) => segment && segment !== "." && segment !== "..") ? path : undefined;
+}
+
+/**
+ * Where an option stands in a workflow, as ClickUp groups statuses: not started, in progress, or
+ * finished. Apps use it to collapse finished board columns and to count progress. Filters never use
+ * it: Obsidian cannot read it, so a filter lists the option values themselves.
+ */
+export const STATUS_CATEGORIES = ["todo", "active", "done"] as const;
+export type StatusCategory = (typeof STATUS_CATEGORIES)[number];
+export const STATUS_CATEGORY_LABELS: Readonly<Record<StatusCategory, string>> = {
+  todo: "To do",
+  active: "In progress",
+  done: "Done",
+};
+
+/** An option's workflow category, or undefined when it has none (or an unknown one). */
+export function optionCategory(option: Pick<StudioOption, "category">): StatusCategory | undefined {
+  return STATUS_CATEGORIES.find((category) => category === option.category);
+}
+
+/** Whether a property's options have workflow categories (at least one option has one). */
+export function hasStatusCategories(property: StudioProperty): boolean {
+  return studioOptions(property).some((option) => optionCategory(option) !== undefined);
 }
 
 /** Whether a declared type shows its values as pills. */

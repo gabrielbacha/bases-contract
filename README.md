@@ -25,9 +25,13 @@ basesStudio:                  # the whole Base
       type: select
       options:
         - { value: Shortlist, color: green-sea }   # a preset, "#RRGGBB" or none
+        - { value: Bought, category: done }        # todo, active or done: display only
       pills: { mode: status, style: solid, wrap: true }
       style: { tone: muted, bold: true, align: center }
       default: Shortlist
+    note.project:
+      type: link
+      linkTarget: projects/Projects.base          # the Base a link picker lists (studioLinkTarget)
   rules: [ … ]                # Base rules
   detailLayouts: { … }
   tableUi: { … }

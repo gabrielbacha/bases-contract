@@ -5,6 +5,12 @@ import { parse } from "yaml";
 
 import {
   encodeOptionKey,
+  hasStatusCategories,
+  optionCategory,
+  STATUS_CATEGORIES,
+  STATUS_CATEGORY_LABELS,
+  studioLinkTarget,
+  type StudioProperty,
   KNOWN_VIEW_KEYS,
   mergeStudioBase,
   mergeStudioView,
@@ -408,5 +414,28 @@ describe("merging in memory", () => {
     });
     const view = mergeStudioView({ rules: [] }, { columns: { "note.a": { wrap: true } } }, { renderer: "board" });
     expect(view.block).toEqual({ renderer: "board", columns: { "note.a": { wrap: true } } });
+  });
+});
+
+describe("link targets and status categories", () => {
+  it("reads a link target as a safe vault path to a Base", () => {
+    expect(studioLinkTarget({ linkTarget: "Projects/Projects.base" })).toBe("Projects/Projects.base");
+    expect(studioLinkTarget({ linkTarget: " /Projects\\Active.BASE " })).toBe("Projects/Active.BASE");
+    for (const linkTarget of ["Projects/notes.md", "../Other/Projects.base", "a/./b.base", "C:/Vault/P.base", 3, ""])
+      expect(studioLinkTarget({ linkTarget } as StudioProperty)).toBeUndefined();
+    expect(studioLinkTarget({})).toBeUndefined();
+  });
+
+  it("reads known option categories only", () => {
+    expect(optionCategory({ category: "done" })).toBe("done");
+    expect(optionCategory({ category: "closed" })).toBeUndefined();
+    expect(optionCategory({})).toBeUndefined();
+    expect(hasStatusCategories({ options: [{ value: "Open" }, { value: "Done", category: "done" }] })).toBe(true);
+    expect(hasStatusCategories({ options: ["Open", { value: "Done" }] } as StudioProperty)).toBe(false);
+    expect(STATUS_CATEGORIES.map((category) => STATUS_CATEGORY_LABELS[category])).toEqual([
+      "To do",
+      "In progress",
+      "Done",
+    ]);
   });
 });
