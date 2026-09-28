@@ -1,6 +1,6 @@
 {
   "name": "@gabrielbacha/bases-contract",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "The shared contract for Obsidian Bases (.base) files: YAML patching, formatting rules, pill colours and the extension blocks.",
   "keywords": [
     "obsidian",
@@ -46,7 +46,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tests",
     "test": "vitest run",
     "check": "pnpm run typecheck && pnpm test",
-    "prepublishOnly": "pnpm run check && pnpm run build"
+    "prepublishOnly": "node scripts/require-pnpm.mjs && pnpm run check && pnpm run build"
   },
   "dependencies": {
     "yaml": "^2.9.1"
