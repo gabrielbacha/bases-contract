@@ -1,0 +1,33 @@
+# Foreign metadata and future versions must survive known edits.
+properties:
+  note.status:
+    displayName: Status
+    type: select
+    options: [Todo, Done]
+basesEditor:
+  schemaVersion: 42
+  future: { owner: future-client }
+  propertyTypes:
+    note.status:
+      type: select
+      futureType: { enabled: true }
+      options:
+        - value: "blocked/awaiting::日本語"
+          label: Blocked
+          futureOption: keep
+basesVisuals:
+  schemaVersion: 7 # version
+  future: { nested: [one, two] } # retain
+views:
+  - type: table
+    name: Main
+    basesVisualsDateFormats:
+      note.checked: YYYY-MM-DD
+    basesVisualsColumnAppearance:
+      note.status: { bold: true }
+    basesVisualsView:
+      schemaVersion: 1
+      rules: []
+      futureView: preserve
+  - type: table # untouched sibling
+    name: Other

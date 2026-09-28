@@ -1,6 +1,5 @@
 export * from "./colors";
 export * from "./column-appearance";
-export * from "./editor-blocks";
 export * from "./known-keys";
 export * from "./names";
 export * from "./normalize";
@@ -9,9 +8,9 @@ export * from "./property-ids";
 export * from "./property-strategies";
 export * from "./row-height";
 export * from "./rules";
+export * from "./studio-blocks";
 export * from "./swatches";
 export * from "./types";
 export * from "./value-equality";
 export * from "./value-order";
-export * from "./visual-blocks";
 export * from "./yaml-patch";

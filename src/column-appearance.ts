@@ -2,8 +2,8 @@ import { normalizeHex, resolveRuleColor } from "./colors";
 
 /**
  * A column's text style, shared by every app that shows a Base: the tone of its values' text,
- * whether they are bold, and (optionally) how its cells align. It is stored by property ID in `basesVisuals.columnAppearances` (every
- * view) or in a view's `basesVisualsView.columnAppearances` (that view only, which wins).
+ * whether they are bold, and (optionally) how its cells align. It is stored in `basesStudio` as a
+ * property's `style` (every view) or as a view's `columns[id].style` (that view only, which wins).
  */
 export const COLUMN_TONES = ["default", "muted", "faint", "custom"] as const;
 export type ColumnTone = (typeof COLUMN_TONES)[number];

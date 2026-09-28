@@ -115,7 +115,7 @@ export interface ConditionalRule {
   operator: RuleOperator;
   operand?: string;
   target: RuleTarget;
-  /** Where the rule is saved: the Base-wide `basesVisuals` block, or the view's `basesVisualsView`. */
+  /** Where the rule was read from: the root `basesStudio` block, or a view's. It is never saved. */
   scope?: RuleScope;
   /** Optional background accent. Omission leaves the native background untouched. */
   color?: RuleColor;
