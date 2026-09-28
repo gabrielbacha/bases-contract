@@ -1,6 +1,6 @@
 {
   "name": "@gabrielbacha/bases-contract",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "The shared contract for Obsidian Bases (.base) files: YAML patching, formatting rules, pill colours and the extension blocks.",
   "keywords": [
     "obsidian",

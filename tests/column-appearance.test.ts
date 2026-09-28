@@ -20,6 +20,8 @@ describe("column appearance", () => {
     expect(normalizeColumnAppearance({ tone: "custom", color: "red" })).toEqual({ tone: "default", bold: false });
     expect(normalizeColumnAppearance({ tone: "loud" })).toEqual({ tone: "default", bold: false });
     expect(normalizeColumnAppearance(null)).toEqual({ tone: "default", bold: false });
+    expect(normalizeColumnAppearance({ align: "center" })).toEqual({ tone: "default", bold: false, align: "center" });
+    expect(normalizeColumnAppearance({ align: "middle" })).toEqual({ tone: "default", bold: false });
     // A colour kept on another tone is not read.
     expect(normalizeColumnAppearance({ tone: "faint", color: "#000000" })).toEqual({ tone: "faint", bold: false });
   });
@@ -29,6 +31,9 @@ describe("column appearance", () => {
     expect(isDefaultColumnAppearance({ tone: "default", bold: true })).toBe(false);
     expect(describeColumnAppearance({ tone: "muted", bold: true })).toBe("Muted + Bold");
     expect(describeColumnAppearance({ tone: "default", bold: false })).toBe("Default");
+    expect(describeColumnAppearance({ tone: "faint", bold: false, align: "center" })).toBe("Faint + Center");
+    // An alignment alone is a style of its own.
+    expect(isDefaultColumnAppearance({ tone: "default", bold: false, align: "right" })).toBe(false);
   });
 
   it("lets a view's entry win over the Base's", () => {
