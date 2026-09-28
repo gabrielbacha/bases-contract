@@ -105,7 +105,21 @@ export interface StudioBase {
   rules?: unknown[];
   detailLayouts?: Record<string, unknown>;
   tableUi?: Record<string, unknown>;
+  /** Record templates, in the order a menu lists them; read them with `studioTemplates`. */
+  templates?: unknown[];
   [key: string]: unknown;
+}
+
+/**
+ * A record template: what a new record starts with. `properties` are frontmatter keys (`status`,
+ * not `note.status`) with plain YAML values; `body` is the Markdown after the frontmatter.
+ */
+export interface StudioTemplate {
+  /** Stable across renames; a view's `defaultTemplate` names it. */
+  id: string;
+  name: string;
+  properties: Record<string, unknown>;
+  body: string;
 }
 
 /** One column's settings in one view. */
@@ -123,6 +137,8 @@ export interface StudioView {
   columns?: Record<string, StudioColumn>;
   /** View rules; they apply after the Base rules. */
   rules?: unknown[];
+  /** The id of the template a new record in this view starts from. */
+  defaultTemplate?: string;
   [key: string]: unknown;
 }
 
@@ -192,6 +208,35 @@ export function studioLinkTarget(property: StudioProperty): string | undefined {
   if (!/\.base$/i.test(path) || /^[a-z]:/i.test(path)) return undefined;
   const segments = path.split("/");
   return segments.every((segment) => segment && segment !== "." && segment !== "..") ? path : undefined;
+}
+
+/**
+ * The Base's record templates, read leniently: an entry without a text id and name is skipped, as
+ * is a second entry with the same id. A missing body is empty and missing properties are none.
+ */
+export function studioTemplates(block: StudioBase): StudioTemplate[] {
+  if (!Array.isArray(block.templates)) return [];
+  const seen = new Set<string>();
+  return block.templates.flatMap((entry): StudioTemplate[] => {
+    if (!isRecord(entry) || typeof entry.id !== "string" || !entry.id || seen.has(entry.id)) return [];
+    if (typeof entry.name !== "string" || !entry.name.trim()) return [];
+    seen.add(entry.id);
+    return [
+      {
+        id: entry.id,
+        name: entry.name.trim(),
+        properties: isRecord(entry.properties) ? structuredClone(entry.properties) : {},
+        body: typeof entry.body === "string" ? entry.body : "",
+      },
+    ];
+  });
+}
+
+/** A view's default template, when it names one of `templates`. */
+export function studioDefaultTemplate(view: StudioView, templates: readonly StudioTemplate[]): StudioTemplate | undefined {
+  return typeof view.defaultTemplate === "string"
+    ? templates.find((template) => template.id === view.defaultTemplate)
+    : undefined;
 }
 
 /**
@@ -782,7 +827,7 @@ export function compactStudioBase(block: StudioBase): StudioBase {
       if (!Object.keys(property).length) delete result.properties[id];
     }
   }
-  for (const key of ["properties", "rules", "detailLayouts", "tableUi"] as const)
+  for (const key of ["properties", "rules", "detailLayouts", "tableUi", "templates"] as const)
     if (isEmpty(result[key])) delete result[key];
   if (result.palette === undefined) delete result.palette;
   return Object.keys(result).length ? { version: STUDIO_VERSION, ...result } : {};

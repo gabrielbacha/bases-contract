@@ -9,7 +9,9 @@ import {
   optionCategory,
   STATUS_CATEGORIES,
   STATUS_CATEGORY_LABELS,
+  studioDefaultTemplate,
   studioLinkTarget,
+  studioTemplates,
   type StudioProperty,
   KNOWN_VIEW_KEYS,
   mergeStudioBase,
@@ -437,5 +439,28 @@ describe("link targets and status categories", () => {
       "In progress",
       "Done",
     ]);
+  });
+});
+
+describe("record templates", () => {
+  it("reads templates leniently and finds a view's default", () => {
+    const templates = studioTemplates({
+      templates: [
+        { id: "bug", name: " Bug report ", properties: { status: "Open" }, body: "## Steps\n" },
+        { id: "bug", name: "Duplicate id" },
+        { id: "idea", name: "Idea" },
+        { id: "", name: "No id" },
+        { id: "x", name: "  " },
+        "not a template",
+      ],
+    });
+    expect(templates).toEqual([
+      { id: "bug", name: "Bug report", properties: { status: "Open" }, body: "## Steps\n" },
+      { id: "idea", name: "Idea", properties: {}, body: "" },
+    ]);
+    expect(studioTemplates({})).toEqual([]);
+    expect(studioDefaultTemplate({ defaultTemplate: "idea" }, templates)?.name).toBe("Idea");
+    expect(studioDefaultTemplate({ defaultTemplate: "gone" }, templates)).toBeUndefined();
+    expect(studioDefaultTemplate({}, templates)).toBeUndefined();
   });
 });

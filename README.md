@@ -35,12 +35,18 @@ basesStudio:                  # the whole Base
   rules: [ … ]                # Base rules
   detailLayouts: { … }
   tableUi: { … }
+  templates:                  # record templates (studioTemplates)
+    - id: 9a1e…               # stable; a view's defaultTemplate names it
+      name: Bug report
+      properties: { status: Open, priority: 3 }   # frontmatter keys, plain values
+      body: "## Steps\n\n## Expected\n"
 views:
   - type: table
     name: Main
     basesStudio:              # this view only
       id: 3f2c…
       renderer: board
+      defaultTemplate: 9a1e…  # the template a new record in this view starts from
       columns:
         note.notes: { wrap: true, style: { tone: faint } }   # wins over the property's style
       rules: [ … ]            # view rules, after the Base rules
